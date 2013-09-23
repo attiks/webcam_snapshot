@@ -1,0 +1,4 @@
+name = "Webcam Snapshot Demonstration"
+description = "Provides a simple demonstration of the webcam snapshot form element."
+core = 6.x
+dependencies[] = webcam_snapshot

@@ -1,0 +1,3 @@
+name = "Webcam Snapshot"
+description = "Provides a form element for taking snapshots from a webcam. Needs a browser that supports getUserMedia."
+core = 6.x

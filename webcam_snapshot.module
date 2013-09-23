@@ -1,0 +1,82 @@
+<?php
+/**
+ * Implements hook_elements().
+ */
+function webcam_snapshot_elements() {
+  return array(
+    'webcam_snapshot' => array(
+      '#input' => TRUE, // Will carry a value, albeit hidden
+      '#process' => array('webcam_snapshot_process'),
+      '#element_validate' => array('webcam_snapshot_validate'),
+      // TODO: add camera height to pass as constraints to getUserMedia
+      '#video_width' => 0,
+      '#video_height' => 360, // width will be 480 or 640
+      '#image_width' => 240,
+      '#image_height' => 320,
+      '#selection_aspect_ratio' => 0.75,
+//      '#selection' => array('top' => 20, 'left' => 120, 'right' => 360, 'bottom' => 340),
+      '#selection' => array('top' => 20, 'left' => 200, 'right' => 440, 'bottom' => 340),
+      '#overlay_opacity' => 0.7,
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function webcam_snapshot_theme() {
+  return array(
+    'webcam_snapshot' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
+ * Default theme function for webcam_snapshot form element
+ */
+function theme_webcam_snapshot($element) {
+  drupal_add_js(drupal_get_path('module', 'webcam_snapshot') .'/webcam_snapshot.js', 'module', 'footer');
+
+  drupal_add_js(array('webcam_snapshot' => array(
+    'id' => $element['#id'],
+    'videoWidth' => $element['#video_width'],
+    'videoHeight' => $element['#video_height'],
+    'destinationSize' => array($element['#image_width'], $element['#image_height']),
+    'selectionAspectRatio' => $element['#selection_aspect_ratio'],
+    'selection' => $element['#selection'],
+    'overlayOpacity' => $element['#overlay_opacity'],
+  )), setting);
+
+  $img = '<img style="display:block; border: 1px solid #888; background: #EEE"';
+  if ($element['#value']) {
+    $img .= ' src="' . check_plain($element['#value']) .'"';
+  }
+  if ($element['#image_width']) {
+    $img .= ' width="' . $element['#image_width'] . '"';
+  }
+  if ($element['#image_height']) {
+    $img .= ' height="' . $element['#image_height'] . '"';
+  }
+  $img .= ' />';
+
+  $button = '<input type="button" value="' .t('Capture') . '" style="display: block" />';
+
+  $video = '<video style="border: 1px solid #888; display: block"';
+  if ($element['#video_width']) {
+    $video .= ' width="' . $element['#video_width'] . '"';
+  }
+  if ($element['#video_height']) {
+    $video .= ' height="' . $element['#video_height'] . '"';
+  }
+  $video .= '>';
+  $video .= t('Your browser does not support the video tag.'). '</video>';
+
+  $field = '<input type="hidden" name="' . $element['#name'] . '"';
+  $field .= ' id="'. $element['#id'] . '"';
+  $field .= ' value="'. check_plain($element['#value']) . '"';
+  $field .=  drupal_attributes($element['#attributes']);
+  $field .= ' />';
+
+  return theme('form_element', $element, $img . $button . $video . $field);
+}

@@ -2,12 +2,12 @@
 /**
  * Implements hook_elements().
  */
-function webcam_snapshot_elements() {
+function webcam_snapshot_element_info() {
   return array(
     'webcam_snapshot' => array(
       '#input' => TRUE, // Will carry a value, albeit hidden
-      '#process' => array('webcam_snapshot_process'),
-      '#element_validate' => array('webcam_snapshot_validate'),
+//      '#process' => array('webcam_snapshot_process'),
+//      '#element_validate' => array('webcam_snapshot_validate'),
       // TODO: add camera height to pass as constraints to getUserMedia
       '#video_width' => 0,
       '#video_height' => 360, // width will be 480 or 640
@@ -17,6 +17,7 @@ function webcam_snapshot_elements() {
 //      '#selection' => array('top' => 20, 'left' => 120, 'right' => 360, 'bottom' => 340),
       '#selection' => array('top' => 20, 'left' => 200, 'right' => 440, 'bottom' => 340),
       '#overlay_opacity' => 0.7,
+      '#theme' => 'webcam_snapshot',
     ),
   );
 }
@@ -27,7 +28,7 @@ function webcam_snapshot_elements() {
 function webcam_snapshot_theme() {
   return array(
     'webcam_snapshot' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
   );
 }
@@ -35,8 +36,9 @@ function webcam_snapshot_theme() {
 /**
  * Default theme function for webcam_snapshot form element
  */
-function theme_webcam_snapshot($element) {
-  drupal_add_js(drupal_get_path('module', 'webcam_snapshot') .'/webcam_snapshot.js', 'module', 'footer');
+function theme_webcam_snapshot($variables) {
+  $element = $variables['element'];
+  drupal_add_js(drupal_get_path('module', 'webcam_snapshot') .'/webcam_snapshot.js');
 
   drupal_add_js(array('webcam_snapshot' => array(
     'id' => $element['#id'],
@@ -46,7 +48,7 @@ function theme_webcam_snapshot($element) {
     'selectionAspectRatio' => $element['#selection_aspect_ratio'],
     'selection' => $element['#selection'],
     'overlayOpacity' => $element['#overlay_opacity'],
-  )), setting);
+  )), 'setting');
 
   $img = '<img style="display:block; border: 1px solid #888; background: #EEE"';
   if ($element['#value']) {
@@ -78,5 +80,5 @@ function theme_webcam_snapshot($element) {
   $field .=  drupal_attributes($element['#attributes']);
   $field .= ' />';
 
-  return theme('form_element', $element, $img . $button . $video . $field);
+  return theme('form_element', $element) . $img . $button . $video . $field;
 }

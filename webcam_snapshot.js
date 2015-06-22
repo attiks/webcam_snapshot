@@ -316,11 +316,13 @@
 	};
 })( jQuery );
 
-Drupal.behaviors.webcam_snapshot = function(context) {
-	var options = Drupal.settings.webcam_snapshot;
-	var $destination = $('#' + options.id);
-	options.$destination = $destination;
-	options.$trigger = $destination.siblings().filter("input[type|='button']");
-	options.$preview = $destination.siblings().filter('img');
-	$destination.siblings().filter('video').webcam_snapshot(options);
+Drupal.behaviors.webcam_snapshot = {
+	attach: function(context) {
+		var options = Drupal.settings.webcam_snapshot;
+		var $destination = jQuery('#' + options.id);
+		options.$destination = $destination;
+		options.$trigger = $destination.siblings().filter("input[type|='button']");
+		options.$preview = $destination.siblings().filter('img');
+		$destination.siblings().filter('video').webcam_snapshot(options);
+	}
 };

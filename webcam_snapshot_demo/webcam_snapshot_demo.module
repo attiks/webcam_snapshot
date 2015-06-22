@@ -13,6 +13,6 @@ function webcam_snapshot_demo_menu() {
   );
 }
 
-function webcam_snapshot_perm() {
-  return array('access webcam snapshot demonstration');
+function webcam_snapshot_permission() {
+  return array('access webcam snapshot demonstration' => array('title' => 'Access webcam snapshot demonstration'));
 }

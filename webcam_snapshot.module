@@ -1,25 +1,221 @@
 <?php
 /**
+ * @file
+ * Hook implementations for Webcam Snapshot module.
+ */
+
+/**
  * Implements hook_elements().
  */
 function webcam_snapshot_element_info() {
   return array(
     'webcam_snapshot' => array(
-      '#input' => TRUE, // Will carry a value, albeit hidden
-//      '#process' => array('webcam_snapshot_process'),
-//      '#element_validate' => array('webcam_snapshot_validate'),
-      // TODO: add camera height to pass as constraints to getUserMedia
+      // Will carry a value, albeit hidden.
+      '#input' => TRUE,
+      '#process' => array('webcam_snapshot_element_process'),
+      // TODO: add camera height to pass as constraints to getUserMedia.
       '#video_width' => 0,
-      '#video_height' => 360, // width will be 480 or 640
+      // Width will be 480 or 640.
+      '#video_height' => 360,
       '#image_width' => 240,
       '#image_height' => 320,
       '#selection_aspect_ratio' => 0.75,
-//      '#selection' => array('top' => 20, 'left' => 120, 'right' => 360, 'bottom' => 340),
-      '#selection' => array('top' => 20, 'left' => 200, 'right' => 440, 'bottom' => 340),
+      '#selection' => array(
+        'top' => 20,
+        'left' => 200,
+        'right' => 440,
+        'bottom' => 340,
+      ),
       '#overlay_opacity' => 0.7,
       '#theme' => 'webcam_snapshot',
     ),
   );
+}
+
+/**
+ * Process callback.
+ */
+function webcam_snapshot_element_process($element) {
+  $element['#attached']['js'][] = drupal_get_path('module', 'webcam_snapshot') . '/webcam_snapshot.js';
+  $element['#attached']['js'][] = array(
+    'data' => array(
+      'webcam_snapshot' => array(
+        'id' => $element['#id'],
+        'videoWidth' => $element['#video_width'],
+        'videoHeight' => $element['#video_height'],
+        'destinationSize' => array($element['#image_width'], $element['#image_height']),
+        'selectionAspectRatio' => $element['#selection_aspect_ratio'],
+        'selection' => $element['#selection'],
+        'overlayOpacity' => $element['#overlay_opacity'],
+      ),
+    ),
+    'type' => 'setting',
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function webcam_snapshot_field_widget_info() {
+  return array(
+    'webcam_snapshot' => array(
+      'label' => t('Webcam snapshot'),
+      'field types' => array('file', 'image'),
+      'settings' => array(
+        'video_width' => 0,
+        'video_height' => 360,
+        'image_width' => 240,
+        'image_height' => 320,
+        'selection_aspect_ratio' => 0.75,
+        'selection' => array(
+          'top' => 20,
+          'left' => 200,
+          'right' => 440,
+          'bottom' => 340,
+        ),
+        'overlay_opacity' => 0.7,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function webcam_snapshot_field_widget_settings_form($field, $instance) {
+  if (strpos($instance['settings']['file_extensions'], 'jpg') === FALSE) {
+    drupal_set_message(t('The webcam snapshot is saved as a .jpg file. The jpg extension needs to be added to the allowed extensions for this field instance.'), 'error');
+  }
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  $form['video_width'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Video width'),
+    '#default_value' => $settings['video_width'],
+    '#required' => TRUE,
+  );
+  $form['video_height'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Video height'),
+    '#default_value' => $settings['video_height'],
+    '#required' => TRUE,
+  );
+  $form['image_width'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Image width'),
+    '#default_value' => $settings['image_width'],
+    '#required' => TRUE,
+  );
+  $form['image_height'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Image height'),
+    '#default_value' => $settings['image_height'],
+    '#required' => TRUE,
+  );
+  $form['selection_aspect_ratio'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_number'),
+    '#title' => t('Selection aspect ratio'),
+    '#default_value' => $settings['selection_aspect_ratio'],
+    '#required' => TRUE,
+  );
+  $form['selection'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#title' => t('Selection'),
+    '#description' => t('Configure the initial selection'),
+  );
+  $form['selection']['top'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Top'),
+    '#default_value' => $settings['selection']['top'],
+    '#required' => TRUE,
+  );
+  $form['selection']['right'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Right'),
+    '#default_value' => $settings['selection']['right'],
+    '#required' => TRUE,
+  );
+  $form['selection']['bottom'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Bottom'),
+    '#default_value' => $settings['selection']['bottom'],
+    '#required' => TRUE,
+  );
+  $form['selection']['left'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer'),
+    '#min' => 0,
+    '#title' => t('Left'),
+    '#default_value' => $settings['selection']['left'],
+    '#required' => TRUE,
+  );
+  $form['overlay_opacity'] = array(
+    '#type' => 'textfield',
+    '#element_validate' => array('element_validate_number'),
+    '#title' => t('Overlay opacity'),
+    '#default_value' => $settings['overlay_opacity'],
+    '#required' => TRUE,
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function webcam_snapshot_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $settings = $instance['widget']['settings'];
+  $element += array(
+    '#type' => 'webcam_snapshot',
+    '#video_width' => $settings['video_width'],
+    '#video_height' => $settings['video_height'],
+    '#image_width' => $settings['image_width'],
+    '#image_height' => $settings['image_height'],
+    '#selection_aspect_ratio' => $settings['selection_aspect_ratio'],
+    '#selection' => $settings['selection'],
+    '#overlay_opacity' => $settings['overlay_opacity'],
+    '#value_callback' => 'webcam_snapshot_field_widget_form_value_callback',
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+    '#upload_location' => file_field_widget_uri($field, $instance),
+  );
+  return $element;
+}
+
+/**
+ * Value callback.
+ */
+function webcam_snapshot_field_widget_form_value_callback($element, $input = FALSE) {
+  if ($input !== FALSE && strpos($input, 'data:') === 0) {
+    $filename = 'webcam_snapshot_' . format_date(REQUEST_TIME, 'custom', 'Y_m_d_H_i_s') . '.jpg';
+    $file = file_save_data(file_get_contents($input), $element['#upload_location'] . '/' . $filename, FILE_EXISTS_RENAME);
+    if ($file) {
+      return (array) $file;
+    }
+  }
+  elseif (!empty($element['#default_value'])) {
+    return $element['#default_value'];
+  }
+
+  return NULL;
 }
 
 /**
@@ -34,25 +230,14 @@ function webcam_snapshot_theme() {
 }
 
 /**
- * Default theme function for webcam_snapshot form element
+ * Default theme function for webcam_snapshot form element.
  */
 function theme_webcam_snapshot($variables) {
   $element = $variables['element'];
-  drupal_add_js(drupal_get_path('module', 'webcam_snapshot') .'/webcam_snapshot.js');
-
-  drupal_add_js(array('webcam_snapshot' => array(
-    'id' => $element['#id'],
-    'videoWidth' => $element['#video_width'],
-    'videoHeight' => $element['#video_height'],
-    'destinationSize' => array($element['#image_width'], $element['#image_height']),
-    'selectionAspectRatio' => $element['#selection_aspect_ratio'],
-    'selection' => $element['#selection'],
-    'overlayOpacity' => $element['#overlay_opacity'],
-  )), 'setting');
 
   $img = '<img style="display:block; border: 1px solid #888; background: #EEE"';
   if ($element['#value']) {
-    $img .= ' src="' . check_plain($element['#value']) .'"';
+    $img .= ' src="' . (is_array($element['#value']) ? file_create_url($element['#value']['uri']) : check_plain($element['#value'])) . '"';
   }
   if ($element['#image_width']) {
     $img .= ' width="' . $element['#image_width'] . '"';
@@ -62,7 +247,7 @@ function theme_webcam_snapshot($variables) {
   }
   $img .= ' />';
 
-  $button = '<input type="button" value="' .t('Capture') . '" style="display: block" />';
+  $button = '<input type="button" value="' . t('Capture') . '" style="display: block" />';
 
   $video = '<video style="border: 1px solid #888; display: block"';
   if ($element['#video_width']) {
@@ -72,12 +257,12 @@ function theme_webcam_snapshot($variables) {
     $video .= ' height="' . $element['#video_height'] . '"';
   }
   $video .= '>';
-  $video .= t('Your browser does not support the video tag.'). '</video>';
+  $video .= t('Your browser does not support the video tag.') . '</video>';
 
   $field = '<input type="hidden" name="' . $element['#name'] . '"';
-  $field .= ' id="'. $element['#id'] . '"';
-  $field .= ' value="'. check_plain($element['#value']) . '"';
-  $field .=  drupal_attributes($element['#attributes']);
+  $field .= ' id="' . $element['#id'] . '"';
+  $field .= ' value="' . (is_array($element['#value']) ? $element['#value']['fid'] : check_plain($element['#value'])) . '"';
+  $field .= drupal_attributes($element['#attributes']);
   $field .= ' />';
 
   return theme('form_element', $element) . $img . $button . $video . $field;

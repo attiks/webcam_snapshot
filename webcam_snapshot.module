@@ -235,7 +235,7 @@ function webcam_snapshot_theme() {
 function theme_webcam_snapshot($variables) {
   $element = $variables['element'];
 
-  $img = '<img style="display:block; border: 1px solid #888; background: #EEE"';
+  $img = '<div class="webcam--component webcam--img"><img style="display:block; border: 1px solid #888; background: #EEE"';
   if ($element['#value']) {
     $img .= ' src="' . (is_array($element['#value']) ? file_create_url($element['#value']['uri']) : check_plain($element['#value'])) . '"';
   }
@@ -245,11 +245,11 @@ function theme_webcam_snapshot($variables) {
   if ($element['#image_height']) {
     $img .= ' height="' . $element['#image_height'] . '"';
   }
-  $img .= ' />';
+  $img .= ' /></div>';
 
-  $button = '<input type="button" value="' . t('Capture') . '" style="display: block" />';
+  $button = '<div class="webcam--component webcam--button"><input type="button" value="' . t('Capture') . '" style="display: block" /></div>';
 
-  $video = '<video style="border: 1px solid #888; display: block"';
+  $video = '<div class="webcam--component webcam--video"><video style="border: 1px solid #888; display: block"';
   if ($element['#video_width']) {
     $video .= ' width="' . $element['#video_width'] . '"';
   }
@@ -257,7 +257,7 @@ function theme_webcam_snapshot($variables) {
     $video .= ' height="' . $element['#video_height'] . '"';
   }
   $video .= '>';
-  $video .= t('Your browser does not support the video tag.') . '</video>';
+  $video .= t('Your browser does not support the video tag.') . '</video></div>';
 
   $field = '<input type="hidden" name="' . $element['#name'] . '"';
   $field .= ' id="' . $element['#id'] . '"';
@@ -265,5 +265,5 @@ function theme_webcam_snapshot($variables) {
   $field .= drupal_attributes($element['#attributes']);
   $field .= ' />';
 
-  return theme('form_element', $element) . $img . $button . $video . $field;
+  return theme('form_element', $element) . $img . $video . $button . $field;
 }

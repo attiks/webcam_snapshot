@@ -55,7 +55,7 @@
 			$message.append($retry);
 			$retry.click(requestCamAccess);
 		}
-		
+
 		// Try and get access to the webcam
 		var requestCamAccess = function() {
 			if (navigator.getUserMedia) {
@@ -150,7 +150,7 @@
 				updateOverlay();
 			}
 		};
-		
+
 		// draw the selection box
 		var updateOverlay = function() {
 			overlay_ctx.globalAlpha = settings.overlayOpacity;
@@ -173,7 +173,7 @@
 			$destinationCanvas.insertAfter($wrapper);
 			$message.insertAfter($overlay);
 		}
-		
+
 		// Rescale on the first canplay event
 		// FIXME why not just unbind the event rather than set a flag?
 		// $video[0].removeEventListener('playing', 'onCanPlay', false);
@@ -185,7 +185,7 @@
 				canPlay = true;
 			}
 		};
-		
+
 		// Get the current mouse position within the overlay
 		var getMousePosition = function(event) {
 			var x = event.pageX - $overlay.offset().left;
@@ -194,7 +194,7 @@
 			y = (y < 0) ? 0 : (y > $overlay.height()) ? $overlay.height() : y;
 			return [x, y];
 		};
-		
+
 		// Start selection on mousedown event
 		var onMouseDown = function(event) {
 			event.preventDefault();
@@ -205,9 +205,9 @@
 			settings.selection.top = selectionStart[1];
 			settings.selection.right = selectionStart[0];
 			settings.selection.bottom = selectionStart[1];
-			updateOverlay();  
+			updateOverlay();
 		};
-		
+
 		// Expand selection on mousemove event
 		var onMouseMove = function(event) {
 			event.preventDefault();
@@ -285,16 +285,16 @@
 			}
 			updateOverlay();
 		}
-		
+
 		// Stop selection on mouseup event
 		var onMouseUp = function(event) {
-			event.preventDefault();  
-			event.stopPropagation();  
-			$(document).unbind('mousemove');  
+			event.preventDefault();
+			event.stopPropagation();
+			$(document).unbind('mousemove');
 			$(document).unbind('mouseup');
 			updateOverlay();
 		}
-		
+
 		$video[0].addEventListener('canplay', onCanPlay, false);
 		$video[0].autoplay = true;
 		$destinationCanvas[0].width = settings.destinationSize[0];
@@ -307,7 +307,7 @@
 			settings.$trigger.click(snapshot);
 		}
 	};
-	
+
 	$.fn.webcam_snapshot = function(options) {
 		this.each(function() {
 			$.webcam_snapshot(this, options)
@@ -321,8 +321,8 @@ Drupal.behaviors.webcam_snapshot = {
 		var options = Drupal.settings.webcam_snapshot;
 		var $destination = jQuery('#' + options.id);
 		options.$destination = $destination;
-		options.$trigger = $destination.siblings().filter("input[type|='button']");
-		options.$preview = $destination.siblings().filter('img');
-		$destination.siblings().filter('video').webcam_snapshot(options);
+		options.$trigger = $destination.parent().find("input[type|='button']");
+		options.$preview = $destination.parent().find('img');
+		$destination.parent().find('video').webcam_snapshot(options);
 	}
 };
